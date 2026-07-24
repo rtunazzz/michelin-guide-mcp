@@ -45,10 +45,29 @@ async function fetchPage(url: string): Promise<string | null> {
       signal: AbortSignal.timeout(10000),
     });
     if (!response.ok) return null;
+    // Reject non-HTML responses (JSON/binary anti-bot challenges) cheaply.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("text/html")) return null;
     return await response.text();
   } catch {
     return null;
   }
+}
+
+// Michelin can serve a HTTP 200 cookie-consent, CAPTCHA/Datadome, or JS-shell
+// page instead of the requested restaurant. Detect the obvious interstitials so
+// they aren't relayed to the model as authoritative content.
+function looksLikeInterstitial(text: string): boolean {
+  if (text.length < 200) return true;
+  const markers = [
+    "enable javascript",
+    "captcha",
+    "datadome",
+    "access to this page has been denied",
+    "verify you are a human",
+  ];
+  const lower = text.toLowerCase();
+  return markers.some((m) => lower.includes(m));
 }
 
 export async function handleSearchLatestInfo(
@@ -74,11 +93,14 @@ export async function handleSearchLatestInfo(
     const html = await fetchPage(michelinUrl);
     if (html) {
       const text = extractTextFromHtml(html);
-      return JSON.stringify({
-        source: "michelin_guide_page",
-        url: michelinUrl,
-        content: text,
-      });
+      if (!looksLikeInterstitial(text)) {
+        return JSON.stringify({
+          source: "michelin_guide_page",
+          url: michelinUrl,
+          verified: false,
+          content: text,
+        });
+      }
     }
   }
 
@@ -92,11 +114,14 @@ export async function handleSearchLatestInfo(
   const html = await fetchPage(searchUrl);
   if (html) {
     const text = extractTextFromHtml(html);
-    return JSON.stringify({
-      source: "michelin_search",
-      url: searchUrl,
-      content: text,
-    });
+    if (!looksLikeInterstitial(text)) {
+      return JSON.stringify({
+        source: "michelin_search",
+        url: searchUrl,
+        verified: false,
+        content: text,
+      });
+    }
   }
 
   return JSON.stringify({

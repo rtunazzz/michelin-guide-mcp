@@ -1,10 +1,10 @@
 # MCP Michelin Guide Server
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.29-green)](https://modelcontextprotocol.io/)
 [![SQLite](https://img.shields.io/badge/SQLite-FTS5-orange)](https://www.sqlite.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Data](https://img.shields.io/badge/Restaurants-~18%2C900-red)](https://github.com/ngshiheng/michelin-my-maps)
+[![Data](https://img.shields.io/badge/Restaurants-~19%2C400-red)](https://github.com/ngshiheng/michelin-my-maps)
 
 ## About
 
@@ -17,7 +17,7 @@ Powered by a local SQLite database with the FTS5 full-text search engine for fas
 - **Multi-criteria restaurant search** -- Combine free-text search, city, country, cuisine type, award level, Green Star, and price level
 - **Restaurant detail lookup** -- Get 17-field details by name (partial match) or Michelin Guide URL
 - **Web fallback search** -- Fetches the latest info from the Michelin Guide website when local data is insufficient
-- **~18,900 restaurants worldwide** -- Based on open-source data updated monthly
+- **~19,400 restaurants worldwide** -- Based on open-source data that is updated regularly
 - **Local-first architecture** -- Fast search with SQLite + FTS5, no network required
 
 ## Architecture
@@ -56,7 +56,7 @@ flowchart LR
 
 | Item | Version | Note |
 |------|---------|------|
-| **Node.js** | >= 18 | LTS recommended |
+| **Node.js** | >= 20 | LTS recommended |
 | **npm** | >= 9 | Included with Node.js |
 | **Claude Code** | Latest | MCP client |
 
@@ -75,7 +75,15 @@ cd michelin-guide-mcp
 npm install
 ```
 
-### 3. Initialize the database
+### 3. Build
+
+Compiles the TypeScript sources (including the setup script used in the next step).
+
+```bash
+npm run build
+```
+
+### 4. Initialize the database
 
 Downloads the CSV source data and creates the SQLite database.
 
@@ -87,12 +95,6 @@ This command will:
 1. Download the latest CSV from the [ngshiheng/michelin-my-maps](https://github.com/ngshiheng/michelin-my-maps) repository
 2. Parse the CSV and clean the data
 3. Create `data/michelin.db` with the restaurants table + FTS5 virtual table
-
-### 4. Build
-
-```bash
-npm run build
-```
 
 ## Claude Code Integration
 
@@ -142,7 +144,7 @@ Search restaurants by combining multiple criteria. Results are sorted by award l
 | `cuisine` | string | - | Cuisine type (e.g., Japanese, French, Italian) |
 | `award` | string | - | Award level: `1 Star` \| `2 Stars` \| `3 Stars` \| `Bib Gourmand` \| `Selected Restaurants` |
 | `green_star` | boolean | - | Whether the restaurant has a Michelin Green Star |
-| `price_level` | number | - | Price level (1=budget to 4=luxury) |
+| `price_level` | number | - | Price level (0=unknown/unpriced, 1=budget to 4=luxury) |
 | `page` | number | - | Page number (default: 1) |
 
 **Example response:**
@@ -251,7 +253,7 @@ Get the latest info for a restaurant in Ginza, Tokyo
 
 ## Updating Data
 
-The source data is updated monthly from [ngshiheng/michelin-my-maps](https://github.com/ngshiheng/michelin-my-maps). To refresh:
+The source data is updated regularly from [ngshiheng/michelin-my-maps](https://github.com/ngshiheng/michelin-my-maps). To refresh:
 
 ```bash
 # Remove existing database and recreate
@@ -287,7 +289,7 @@ michelin-guide-mcp/
 
 | Technology | Purpose |
 |------------|---------|
-| **TypeScript 5.8** | Type-safe server development |
+| **TypeScript 5.x** | Type-safe server development |
 | **@modelcontextprotocol/sdk** | MCP server framework |
 | **better-sqlite3** | High-performance native SQLite bindings |
 | **SQLite FTS5** | Full-text search engine |
@@ -301,6 +303,6 @@ This project is distributed under the [MIT License](LICENSE).
 ## Credits
 
 - **Restaurant data**: [ngshiheng/michelin-my-maps](https://github.com/ngshiheng/michelin-my-maps) (MIT License)
-  - Open-source project providing data on ~18,900 Michelin Guide restaurants worldwide
-  - Automatically updated monthly for the latest data
+  - Open-source project providing data on ~19,400 Michelin Guide restaurants worldwide
+  - Updated regularly with the latest data
 - **MCP Protocol**: [Model Context Protocol](https://modelcontextprotocol.io/) by Anthropic

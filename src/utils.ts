@@ -8,19 +8,22 @@ export function parseLocation(location: string): { city: string; country: string
       country: parts[parts.length - 1],
     };
   }
-  return { city: parts[0], country: "" };
+  // Single-part locations are city-states (Singapore, Dubai, Macau, Abu Dhabi,
+  // Luxembourg). Treat the sole token as both city and country so that a
+  // country-filtered search resolves them instead of returning zero results.
+  return { city: parts[0], country: parts[0] };
 }
 
 export function normalizePriceLevel(price: string): number {
   if (!price) return 0;
-  const dollarCount = (price.match(/\$/g) || []).length;
-  if (dollarCount > 0) return dollarCount;
-  const euroCount = (price.match(/€/g) || []).length;
-  if (euroCount > 0) return euroCount;
-  const poundCount = (price.match(/£/g) || []).length;
-  if (poundCount > 0) return poundCount;
-  const yenCount = (price.match(/¥/g) || []).length;
-  if (yenCount > 0) return yenCount;
+  // Michelin encodes price tiers as repeated currency glyphs (e.g. "$$", "€€€",
+  // "฿฿"). Count occurrences of whichever glyph appears, capped at 4 tiers.
+  const symbols = ["$", "€", "£", "¥", "฿", "₩", "₫", "₺"];
+  for (const symbol of symbols) {
+    // split()-based count avoids per-symbol regex escaping (e.g. "$").
+    const count = price.split(symbol).length - 1;
+    if (count > 0) return Math.min(count, 4);
+  }
   return 0;
 }
 

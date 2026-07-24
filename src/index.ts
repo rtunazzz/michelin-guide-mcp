@@ -34,7 +34,7 @@ server.registerTool(
   "get_restaurant_detail",
   {
     description:
-      "Get detailed information about a specific Michelin Guide restaurant by name (partial match) or Michelin Guide URL. Returns all 15 fields including description, facilities, contact info, and coordinates.",
+      "Get detailed information about a specific Michelin Guide restaurant by name (partial match) or Michelin Guide URL. Returns all 17 fields including description, facilities, contact info, and coordinates.",
     inputSchema: getRestaurantDetailSchema.shape,
   },
   async (params) => ({

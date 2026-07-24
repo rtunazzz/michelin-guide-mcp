@@ -27,8 +27,10 @@ export function initDatabase(): BetterSqlite3.Database {
     );
   }
 
+  // Opened read-only: the DB's journal mode is already persisted in the file
+  // header by the setup script, so no journal_mode pragma is needed here (it
+  // would be a no-op on a WAL DB and throw on a non-WAL one).
   db = new Database(DB_PATH, { readonly: true });
-  db.pragma("journal_mode = WAL");
   return db;
 }
 
@@ -49,6 +51,12 @@ export function searchRestaurants(filters: SearchFilters): {
     if (escaped) {
       usesFts = true;
       params.ftsQuery = escaped;
+    } else {
+      // A query was supplied but produced no searchable tokens (e.g. all
+      // punctuation or whitespace). Treat this as a zero-match search rather
+      // than silently dropping the filter and returning the entire table.
+      const page = Math.max(1, filters.page || 1);
+      return { total: 0, page, totalPages: 0, results: [] };
     }
   }
 

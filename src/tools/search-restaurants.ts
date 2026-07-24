@@ -34,10 +34,10 @@ export const searchRestaurantsSchema = z.object({
   price_level: z
     .number()
     .int()
-    .min(1)
+    .min(0)
     .max(4)
     .optional()
-    .describe("Price level (1=budget to 4=luxury)"),
+    .describe("Price level (0=unknown/unpriced, 1=budget to 4=luxury)"),
   page: z
     .number()
     .int()
