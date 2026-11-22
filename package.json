@@ -1,28 +1,29 @@
 {
-  "name": "michelin-guide-mcp",
+  "name": "michelin-guide-mcp-cloudflare",
   "version": "1.0.0",
-  "description": "MCP server for searching Michelin Guide restaurants from Claude Code",
+  "private": true,
+  "description": "Michelin Guide MCP server adapted for Cloudflare Workers and D1",
   "type": "module",
-  "main": "build/index.js",
   "scripts": {
-    "build": "tsc",
-    "setup": "node build/scripts/setup-data.js",
-    "start": "node build/index.js"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "data:prepare": "bun scripts/prepare-data.ts",
+    "data:local": "bun scripts/import-data.ts --local",
+    "data:remote": "bun scripts/import-data.ts --remote",
+    "smoke": "bun scripts/smoke.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "better-sqlite3": "^12.9.0",
+    "@modelcontextprotocol/server": "2.3.1",
+    "agents": "^0.29.0",
     "csv-parse": "^5.6.0",
-    "zod": "^3.25.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22.0.0",
-    "typescript": "^5.8.0"
-  },
-  "engines": {
-    "node": ">=20",
-    "npm": ">=9"
-  },
-  "license": "MIT"
+    "@cloudflare/workers-types": "^5.20261121.1",
+    "bun-types": "^1.4.5",
+    "typescript": "6.0.3",
+    "wrangler": "^4.105.0"
+  }
 }

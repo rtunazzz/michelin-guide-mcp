@@ -1,50 +1,29 @@
-export function parseLocation(location: string): { city: string; country: string } {
-  if (!location) return { city: "", country: "" };
+import type { RestaurantRow } from "./types";
 
-  const parts = location.split(",").map((s) => s.trim());
-  if (parts.length >= 2) {
-    return {
-      city: parts[0],
-      country: parts[parts.length - 1],
-    };
-  }
-  // Single-part locations are city-states (Singapore, Dubai, Macau, Abu Dhabi,
-  // Luxembourg). Treat the sole token as both city and country so that a
-  // country-filtered search resolves them instead of returning zero results.
-  return { city: parts[0], country: parts[0] };
+export function escapeFtsQuery(input: string): string {
+  const tokens = input.replace(/["\-*()^~:]/g, " ").trim().split(/\s+/).filter(Boolean);
+  return tokens.map((token) => `"${token}"`).join(" ");
+}
+
+export function parseLocation(location: string) {
+  const parts = location.split(",").map((part) => part.trim()).filter(Boolean);
+  if (!parts.length) return { city: "", country: "" };
+  return { city: parts[0], country: parts.length === 1 ? parts[0] : parts.at(-1)! };
 }
 
 export function normalizePriceLevel(price: string): number {
-  if (!price) return 0;
-  // Michelin encodes price tiers as repeated currency glyphs (e.g. "$$", "€€€",
-  // "฿฿"). Count occurrences of whichever glyph appears, capped at 4 tiers.
-  const symbols = ["$", "€", "£", "¥", "฿", "₩", "₫", "₺"];
-  for (const symbol of symbols) {
-    // split()-based count avoids per-symbol regex escaping (e.g. "$").
+  for (const symbol of ["$", "€", "£", "¥", "฿", "₩", "₫", "₺"]) {
     const count = price.split(symbol).length - 1;
-    if (count > 0) return Math.min(count, 4);
+    if (count) return Math.min(count, 4);
   }
   return 0;
 }
 
-export function escapeFtsQuery(input: string): string {
-  if (!input) return "";
-  const escaped = input.replace(/["\-*()^~:]/g, " ").trim();
-  const tokens = escaped.split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return "";
-  return tokens.map((t) => `"${t}"`).join(" ");
+export function parseFacilities(value: string): string[] {
+  return value.split(",").map((facility) => facility.trim()).filter(Boolean);
 }
 
-export function rowToSummary(row: {
-  name: string;
-  award: string;
-  city: string;
-  country: string;
-  cuisine: string;
-  price_level: number;
-  green_star: number;
-  url: string;
-}) {
+export function rowToSummary(row: RestaurantRow) {
   return {
     name: row.name,
     award: row.award,
@@ -53,29 +32,12 @@ export function rowToSummary(row: {
     cuisine: row.cuisine,
     price_level: row.price_level,
     green_star: row.green_star === 1,
+    facilities: parseFacilities(row.facilities_and_services),
     url: row.url,
   };
 }
 
-export function rowToRestaurant(row: {
-  name: string;
-  address: string;
-  location: string;
-  price: string;
-  cuisine: string;
-  longitude: string;
-  latitude: string;
-  phone_number: string;
-  url: string;
-  website_url: string;
-  award: string;
-  green_star: number;
-  facilities_and_services: string;
-  description: string;
-  city: string;
-  country: string;
-  price_level: number;
-}) {
+export function rowToRestaurant(row: RestaurantRow) {
   return {
     name: row.name,
     address: row.address,
@@ -90,6 +52,7 @@ export function rowToRestaurant(row: {
     award: row.award,
     green_star: row.green_star === 1,
     facilities_and_services: row.facilities_and_services,
+    facilities: parseFacilities(row.facilities_and_services),
     description: row.description,
     city: row.city,
     country: row.country,

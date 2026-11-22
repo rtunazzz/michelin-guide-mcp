@@ -1,22 +1,10 @@
-export interface Restaurant {
-  name: string;
-  address: string;
-  location: string;
-  price: string;
-  cuisine: string;
-  longitude: string;
-  latitude: string;
-  phone_number: string;
-  url: string;
-  website_url: string;
-  award: string;
-  green_star: boolean;
-  facilities_and_services: string;
-  description: string;
-  city: string;
-  country: string;
-  price_level: number;
-}
+export const AWARDS = [
+  "1 Star",
+  "2 Stars",
+  "3 Stars",
+  "Bib Gourmand",
+  "Selected Restaurants",
+] as const;
 
 export interface RestaurantRow {
   name: string;
@@ -43,28 +31,13 @@ export interface SearchFilters {
   city?: string;
   country?: string;
   cuisine?: string;
-  award?: string;
+  award?: (typeof AWARDS)[number];
   green_star?: boolean;
   price_level?: number;
+  min_price_level?: number;
+  max_price_level?: number;
+  facilities?: string[];
   page?: number;
-}
-
-export interface SearchResult {
-  total: number;
-  page: number;
-  totalPages: number;
-  results: RestaurantSummary[];
-}
-
-export interface RestaurantSummary {
-  name: string;
-  award: string;
-  city: string;
-  country: string;
-  cuisine: string;
-  price_level: number;
-  green_star: boolean;
-  url: string;
 }
 
 export const AWARD_ORDER: Record<string, number> = {
